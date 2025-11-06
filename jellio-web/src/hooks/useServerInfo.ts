@@ -9,19 +9,30 @@ const useServerInfo = (): Maybe<ServerInfo> => {
 
   useEffect(() => {
     const fetchServerInfo = async (): Promise<void> => {
+      // Still mounting or computing token
+      if (accessToken === undefined) {
+        setServerInfo(undefined);
+        return;
+      }
+
+      // No token available from localStorage
+      if (accessToken === null) {
+        setServerInfo(null);
+        return;
+      }
+
       try {
-        // Try to fetch using session auth (cookies)
-        var serverInfo = await getServerInfo();
+        const info = await getServerInfo(accessToken);
         setServerInfo({
-          accessToken: accessToken || '', // May not exist, that's OK
-          ...serverInfo,
+          accessToken,
+          ...info,
         });
       } catch (error) {
-        console.error('Failed to authenticate with Jellyfin session:', error);
+        console.error('Failed to fetch server info with access token:', error);
         setServerInfo(null);
       }
     };
-    
+
     void fetchServerInfo();
   }, [accessToken]);
 
