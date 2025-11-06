@@ -1,8 +1,8 @@
 using System;
 using System.Security.Claims;
-using Jellyfin.Data.Entities;
 using Jellyfin.Data.Queries;
 using MediaBrowser.Controller.Devices;
+using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 
 namespace Jellyfin.Plugin.Jellio.Helpers;
