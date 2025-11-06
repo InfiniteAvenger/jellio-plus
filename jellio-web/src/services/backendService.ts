@@ -1,15 +1,19 @@
 import axios from 'axios';
-import { getBaseUrl } from '@/lib/utils';
+import { getBaseUrl, getOrCreateDeviceId } from '@/lib/utils';
 import type { Library } from '@/types';
 
 export const getServerInfo = async (
   token?: string,
 ): Promise<{ serverName: string; libraries: Library[] }> => {
   try {
-    const headers = token
-      ? { Authorization: `MediaBrowser Token="${token}"` }
-      : {};
-    
+    const headers: Record<string, string> = {};
+    if (token) {
+      const deviceId = getOrCreateDeviceId();
+      headers['Authorization'] = `MediaBrowser Token="${token}"`;
+      headers['X-Emby-Token'] = token;
+      headers['X-Emby-Authorization'] = `MediaBrowser Client="Jellio", Device="Web", DeviceId="${deviceId}", Version="0.0.0", Token="${token}"`;
+    }
+
     const response = await axios.get(`${getBaseUrl()}/server-info`, {
       headers,
       withCredentials: true, // Include cookies for Jellyfin session auth
@@ -31,10 +35,14 @@ export const getServerInfo = async (
 
 export const startAddonSession = async (token?: string): Promise<string> => {
   try {
-    const headers = token
-      ? { Authorization: `MediaBrowser Token="${token}"` }
-      : {};
-      
+    const headers: Record<string, string> = {};
+    if (token) {
+      const deviceId = getOrCreateDeviceId();
+      headers['Authorization'] = `MediaBrowser Token="${token}"`;
+      headers['X-Emby-Token'] = token;
+      headers['X-Emby-Authorization'] = `MediaBrowser Client="Jellio", Device="Web", DeviceId="${deviceId}", Version="0.0.0", Token="${token}"`;
+    }
+
     const response = await axios.post(`${getBaseUrl()}/start-session`, null, {
       headers,
       withCredentials: true,
