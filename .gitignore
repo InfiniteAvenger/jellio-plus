@@ -5,6 +5,7 @@ obj/
 artifacts
 server/
 config.html
+!Jellyfin.Plugin.Jellio/Web/config.html
 .aider*
 logs
 *.log

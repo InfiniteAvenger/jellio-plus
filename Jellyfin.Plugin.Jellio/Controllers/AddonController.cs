@@ -21,13 +21,26 @@ namespace Jellyfin.Plugin.Jellio.Controllers;
 [ConfigAuthorize]
 [Route("jellio/{config}")]
 [Produces(MediaTypeNames.Application.Json)]
-public class AddonController(
-    IUserManager userManager,
-    IUserViewManager userViewManager,
-    IDtoService dtoService,
-    ILibraryManager libraryManager
-) : ControllerBase
+public class AddonController : ControllerBase
 {
+    private readonly IUserManager _userManager;
+    private readonly IUserViewManager _userViewManager;
+    private readonly IDtoService _dtoService;
+    private readonly ILibraryManager _libraryManager;
+
+    public AddonController(
+        IUserManager userManager,
+        IUserViewManager userViewManager,
+        IDtoService dtoService,
+        ILibraryManager libraryManager
+    )
+    {
+        _userManager = userManager;
+        _userViewManager = userViewManager;
+        _dtoService = dtoService;
+        _libraryManager = libraryManager;
+    }
+
     private string GetBaseUrl()
     {
         return $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
@@ -91,9 +104,9 @@ public class AddonController(
         return meta;
     }
 
-    private OkObjectResult GetStreamsResult(Guid userId, IUserManager userManager, List<BaseItem> items)
+    private OkObjectResult GetStreamsResult(Guid userId, List<BaseItem> items)
     {
-        var user = userManager.GetUserById(userId);
+        var user = _userManager.GetUserById(userId);
         if (user == null)
         {
             return Ok(new { streams = Array.Empty<object>() });
@@ -101,7 +114,7 @@ public class AddonController(
 
         var baseUrl = GetBaseUrl();
         var dtoOptions = new DtoOptions(true);
-        var dtos = dtoService.GetBaseItemDtos(items, dtoOptions, user);
+        var dtos = _dtoService.GetBaseItemDtos(items, dtoOptions, user);
         var streams = dtos.SelectMany(dto =>
             dto.MediaSources.Select(source => new StreamDto
             {
@@ -118,7 +131,7 @@ public class AddonController(
     {
         var userId = (Guid)HttpContext.Items["JellioUserId"]!;
 
-        var userLibraries = LibraryHelper.GetUserLibraries(userId, userManager, userViewManager, dtoService);
+        var userLibraries = LibraryHelper.GetUserLibraries(userId, _userManager, _userViewManager, _dtoService);
         userLibraries = Array.FindAll(userLibraries, l => config.LibrariesGuids.Contains(l.Id));
         if (userLibraries.Length != config.LibrariesGuids.Count)
         {
@@ -185,17 +198,17 @@ public class AddonController(
     {
         var userId = (Guid)HttpContext.Items["JellioUserId"]!;
 
-        var userLibraries = LibraryHelper.GetUserLibraries(userId, userManager, userViewManager, dtoService);
+        var userLibraries = LibraryHelper.GetUserLibraries(userId, _userManager, _userViewManager, _dtoService);
         var catalogLibrary = Array.Find(userLibraries, l => l.Id == catalogId);
         if (catalogLibrary == null)
         {
             return NotFound();
         }
 
-        var item = libraryManager.GetParentItem(catalogLibrary.Id, userId);
+        var item = _libraryManager.GetParentItem(catalogLibrary.Id, userId);
         if (item is not Folder folder)
         {
-            folder = libraryManager.GetUserRootFolder();
+            folder = _libraryManager.GetUserRootFolder();
         }
 
         var extras =
@@ -217,13 +230,13 @@ public class AddonController(
         {
             Fields = [ItemFields.ProviderIds, ItemFields.Overview, ItemFields.Genres],
         };
-        
-        var user = userManager.GetUserById(userId);
+
+        var user = _userManager.GetUserById(userId);
         if (user == null)
         {
             return Unauthorized();
         }
-        
+
         var query = new InternalItemsQuery(user)
         {
             Recursive = true, // need this for search to work
@@ -240,7 +253,7 @@ public class AddonController(
             DtoOptions = dtoOptions,
         };
         var result = folder.GetItems(query);
-        var dtos = dtoService.GetBaseItemDtos(result.Items, dtoOptions, user);
+        var dtos = _dtoService.GetBaseItemDtos(result.Items, dtoOptions, user);
         var baseUrl = GetBaseUrl();
         var metas = dtos.Select(dto => MapToMeta(dto, stremioType, baseUrl));
 
@@ -256,13 +269,13 @@ public class AddonController(
     {
         var userId = (Guid)HttpContext.Items["JellioUserId"]!;
 
-        var item = libraryManager.GetItemById<BaseItem>(mediaId, userId);
+        var item = _libraryManager.GetItemById<BaseItem>(mediaId, userId);
         if (item == null)
         {
             return NotFound();
         }
 
-        var user = userManager.GetUserById(userId);
+        var user = _userManager.GetUserById(userId);
         if (user == null)
         {
             return Unauthorized();
@@ -272,7 +285,7 @@ public class AddonController(
         {
             Fields = [ItemFields.ProviderIds, ItemFields.Overview, ItemFields.Genres],
         };
-        var dto = dtoService.GetBaseItemDto(item, dtoOptions, user);
+        var dto = _dtoService.GetBaseItemDto(item, dtoOptions, user);
         var baseUrl = GetBaseUrl();
         var meta = MapToMeta(dto, stremioType, baseUrl, includeDetails: true);
 
@@ -285,7 +298,7 @@ public class AddonController(
 
             var episodes = series.GetEpisodes(user, dtoOptions, false).ToList();
             var seriesItemOptions = new DtoOptions { Fields = [ItemFields.Overview] };
-            var dtos = dtoService.GetBaseItemDtos(episodes, seriesItemOptions, user);
+            var dtos = _dtoService.GetBaseItemDtos(episodes, seriesItemOptions, user);
             var videos = dtos.Select(episode => new VideoDto
             {
                 Id = $"jellio:{episode.Id}",
@@ -312,13 +325,13 @@ public class AddonController(
     {
         var userId = (Guid)HttpContext.Items["JellioUserId"]!;
 
-        var item = libraryManager.GetItemById<BaseItem>(mediaId, userId);
+        var item = _libraryManager.GetItemById<BaseItem>(mediaId, userId);
         if (item == null)
         {
             return NotFound();
         }
 
-        return GetStreamsResult(userId, userManager, [item]);
+        return GetStreamsResult(userId, [item]);
     }
 
     [HttpGet("stream/movie/tt{imdbId}.json")]
@@ -329,7 +342,7 @@ public class AddonController(
     {
         var userId = (Guid)HttpContext.Items["JellioUserId"]!;
 
-        var user = userManager.GetUserById(userId);
+        var user = _userManager.GetUserById(userId);
         if (user == null)
         {
             return Unauthorized();
@@ -340,9 +353,9 @@ public class AddonController(
             HasAnyProviderId = new Dictionary<string, string> { ["Imdb"] = $"tt{imdbId}" },
             IncludeItemTypes = [BaseItemKind.Movie],
         };
-        var items = libraryManager.GetItemList(query);
+        var items = _libraryManager.GetItemList(query);
 
-        return GetStreamsResult(userId, userManager, items);
+        return GetStreamsResult(userId, items);
     }
 
     [HttpGet("stream/series/tt{imdbId}:{seasonNum:int}:{episodeNum:int}.json")]
@@ -355,7 +368,7 @@ public class AddonController(
     {
         var userId = (Guid)HttpContext.Items["JellioUserId"]!;
 
-        var user = userManager.GetUserById(userId);
+        var user = _userManager.GetUserById(userId);
         if (user == null)
         {
             return Unauthorized();
@@ -366,7 +379,7 @@ public class AddonController(
             IncludeItemTypes = [BaseItemKind.Series],
             HasAnyProviderId = new Dictionary<string, string> { ["Imdb"] = $"tt{imdbId}" },
         };
-        var seriesItems = libraryManager.GetItemList(seriesQuery);
+        var seriesItems = _libraryManager.GetItemList(seriesQuery);
 
         if (seriesItems.Count == 0)
         {
@@ -382,8 +395,8 @@ public class AddonController(
             ParentIndexNumber = seasonNum,
             IndexNumber = episodeNum,
         };
-        var episodeItems = libraryManager.GetItemList(episodeQuery);
+        var episodeItems = _libraryManager.GetItemList(episodeQuery);
 
-        return GetStreamsResult(userId, userManager, episodeItems);
+        return GetStreamsResult(userId, episodeItems);
     }
 }
