@@ -17,7 +17,7 @@ public static class LibraryHelper
             return Array.Empty<BaseItemDto>();
         }
 
-        var query = new UserViewQuery { UserId = userId };
+        var query = new UserViewQuery { User = user };
         var folders = userViewManager.GetUserViews(query);
 
         var dtoOptions = new DtoOptions(false);
