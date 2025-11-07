@@ -359,14 +359,14 @@ public class AddonController : ControllerBase
 
         if (items.Count == 0)
         {
-            // No local stream found; provide a Jellyseerr request link if configured
+            // No local stream found; provide a Jellyseerr request stream if configured
             if (config.JellyseerrEnabled && !string.IsNullOrWhiteSpace(config.JellyseerrUrl))
             {
                 var baseUrl = GetBaseUrl(config.PublicBaseUrl);
                 var requestUrl = $"{baseUrl}/jellio/{Request.RouteValues["config"]}/request?type=movie&imdbId=tt{imdbId}";
                 var streams = new[]
                 {
-                    new { externalUrl = requestUrl, name = "Request via Jellyseerr", description = "Send request to download via Jellyseerr" }
+                    new { url = requestUrl, name = "📥 Request via Jellyseerr", description = "Click to send request to Jellyseerr" }
                 };
                 return Ok(new { streams });
             }
@@ -424,7 +424,7 @@ public class AddonController : ControllerBase
                 var requestUrl = $"{baseUrl}/jellio/{Request.RouteValues["config"]}/request?type=tv&imdbId=tt{imdbId}&season={seasonNum}&episode={episodeNum}";
                 var streams = new[]
                 {
-                    new { externalUrl = requestUrl, name = "Request via Jellyseerr", description = "Send request to download via Jellyseerr" }
+                    new { url = requestUrl, name = "📥 Request via Jellyseerr", description = "Click to send request to Jellyseerr" }
                 };
                 return Ok(new { streams });
             }

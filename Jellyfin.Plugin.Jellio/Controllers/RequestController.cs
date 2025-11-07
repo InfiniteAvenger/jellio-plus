@@ -109,7 +109,9 @@ public class RequestController : ControllerBase
             using var createResp = await client.PostAsJsonAsync("api/v1/request", body);
             if (createResp.IsSuccessStatusCode)
             {
-                return Content("Request sent to Jellyseerr.", "text/plain");
+                // Return a simple success message
+                // Stremio will attempt to play this URL, fail gracefully, but the request is already sent
+                return Content("✓ Content request sent to Jellyseerr successfully!", "text/plain");
             }
 
             return Problem($"Jellyseerr request failed with status {(int)createResp.StatusCode}.", statusCode: 502);
