@@ -32,7 +32,7 @@ public class RequestController : ControllerBase
 
     [HttpGet]
     public async Task<IActionResult> CreateRequest(
-        [ConfigFromBase64Json] ConfigModel config,
+        [ConfigFromBase64Json] ConfigModel? config,
         [FromQuery] string type,
         [FromQuery] int? tmdbId,
         [FromQuery] string? imdbId,
@@ -41,6 +41,11 @@ public class RequestController : ControllerBase
         [FromQuery] int? episode
     )
     {
+        if (config is null)
+        {
+            return BadRequest("Invalid or missing configuration.");
+        }
+
         if (!config.JellyseerrEnabled || string.IsNullOrWhiteSpace(config.JellyseerrUrl))
         {
             return BadRequest("Jellyseerr is not configured.");

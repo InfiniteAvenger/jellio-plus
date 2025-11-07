@@ -15,13 +15,29 @@ public class Base64JsonModelBinder : IModelBinder
         ArgumentNullException.ThrowIfNull(bindingContext);
 
         var value = bindingContext.ValueProvider.GetValue(bindingContext.ModelName).FirstValue;
-        ArgumentNullException.ThrowIfNull(value);
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            bindingContext.Result = ModelBindingResult.Failed();
+            return Task.CompletedTask;
+        }
 
-        var json = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(value));
-        var result = JsonSerializer.Deserialize<ConfigModel>(json);
-        ArgumentNullException.ThrowIfNull(result);
+        try
+        {
+            var json = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(value));
+            var result = JsonSerializer.Deserialize<ConfigModel>(json);
+            if (result is null)
+            {
+                bindingContext.Result = ModelBindingResult.Failed();
+                return Task.CompletedTask;
+            }
 
-        bindingContext.Result = ModelBindingResult.Success(result);
-        return Task.CompletedTask;
+            bindingContext.Result = ModelBindingResult.Success(result);
+            return Task.CompletedTask;
+        }
+        catch
+        {
+            bindingContext.Result = ModelBindingResult.Failed();
+            return Task.CompletedTask;
+        }
     }
 }
