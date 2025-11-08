@@ -39,7 +39,7 @@ All credit for the original work goes to Vanchaxy. This version includes small u
    ```
    https://<your-jellyfin-server>/jellio
    ```
-2. Add your Jellyfin **API Key** (Dashboard → Users → [User] → API Keys → New Key)
+2. Add your Jellyseer **API Key** and Jellyseer address.
 3. Choose which libraries (Movies, TV Shows) to expose
 4. Copy the generated addon URL
 5. In Stremio, go to **Addons → Community Addons → Add via URL**, paste it, and install
