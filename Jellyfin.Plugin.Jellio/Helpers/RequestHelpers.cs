@@ -33,7 +33,7 @@ public static class RequestHelpers
         ISessionManager? sessionManager = null
     )
     {
-        // First, try to find the token in devices
+        // Try to find the token in devices
         var items = deviceManager
             .GetDevices(new DeviceQuery { AccessToken = authToken, Limit = 1 })
             .Items;
@@ -43,17 +43,15 @@ public static class RequestHelpers
             return items[0].UserId;
         }
 
-        // If not found in devices, try to find it in active sessions
-        if (sessionManager != null)
+        // If not found in devices, try to find it by checking all devices
+        // (in case the token format or query doesn't match exactly)
+        var allDevices = deviceManager.GetDevices(new DeviceQuery { Limit = 1000 }).Items;
+        foreach (var device in allDevices)
         {
-            var sessions = sessionManager.Sessions;
-            var session = sessions.FirstOrDefault(s => 
-                s.AuthenticationToken != null && 
-                s.AuthenticationToken.Equals(authToken, StringComparison.OrdinalIgnoreCase));
-            
-            if (session != null)
+            if (device.AccessToken != null && 
+                device.AccessToken.Equals(authToken, StringComparison.OrdinalIgnoreCase))
             {
-                return session.UserId;
+                return device.UserId;
             }
         }
 
