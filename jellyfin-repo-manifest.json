@@ -8,14 +8,6 @@
         "category": "General",
         "versions": [
             {
-                "version": "1.4.1.0",
-                "changelog": "**Full Changelog**: https://github.com/InfiniteAvenger/jellio-plus/compare/v1.4.0...v1.4.1",
-                "targetAbi": "10.11.0.0",
-                "sourceUrl": "https://github.com/InfiniteAvenger/jellio-plus/releases/download/v1.4.1/jellio_1.4.1.0.zip",
-                "checksum": "577d45bd722a786122e2e0f6f9dc7666",
-                "timestamp": "2026-01-12T01:08:26Z"
-            },
-            {
                 "version": "1.4.0.0",
                 "changelog": "Fixes\r\n\r\n    Fixed streaming authentication for Jellyfin 10.11.5 (added api_key parameter to stream URLs)\r\n    Fixed 401 errors on server-info endpoint (improved token validation)\r\n    Fixed audio playback for DTS-HD MA 5.1 files (added audio transcoding parameters)\r\n    Fixed missing authToken parameter in GetStreamImdbTv method\r\n\r\nNew Features\r\n\r\n    Added logs viewer on settings page with real-time monitoring, auto-refresh, and color-coded log levels\r\n    Added settings persistence \u2014 library selections and all form inputs are saved to Jellyfin server and restored on page load\r\n\r\nImprovements\r\n\r\n    Improved device token lookup to support both device and session tokens\r\n    Enhanced logging throughout the codebase for better debugging\r\n\r\nAll changes maintain backward compatibility with existing configurations.",
                 "targetAbi": "10.11.0.0",
