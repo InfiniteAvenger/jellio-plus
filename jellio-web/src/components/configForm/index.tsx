@@ -130,8 +130,10 @@ const ConfigForm: FC<Props> = ({ serverInfo }) => {
           libraries={serverInfo.libraries}
         />
         <JellyseerrFieldset form={form} />
-        <div className="flex flex-col items-center justify-center gap-2 p-3">
+        <div className="p-3">
           <LogsViewer accessToken={serverInfo.accessToken} />
+        </div>
+        <div className="flex flex-col items-center justify-center gap-2 p-3">
           <Button
             type="button"
             variant="outline"
